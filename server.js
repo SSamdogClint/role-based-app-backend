@@ -18,14 +18,14 @@ app.use(cors({
 app.use(express.json());//middleware to parse JSON
 
 // in memory database
-let user = [
-    { id: 1, username: 'admin', password: '$2a$10$...', role: 'admin' },
-    { id: 2, username: 'alice', password: '$2a$10$...', role: 'user'}
+let users = [
+    { id: 1, username: 'admin', password: 'placeholder', role: 'admin', First_name: 'Admin', Last_name: '123', email: 'admin@example.com' },
+    { id: 2, username: 'alice', password: 'placeholder', role: 'user', First_name: 'Alice', Last_name: 'Gou', email: 'user1@example.com' }
 ];
 
-if (!user[0].password.includes($2a$)) {
-    user[0].password = bcrypt.hashSync('admin123', 10);
-    user[1].password = bcrypt.hashSync('user123', 10);
+if (!users[0].password.includes('$2a$')) {
+    users[0].password = bcrypt.hashSync('admin123', 10);
+    users[1].password = bcrypt.hashSync('user123', 10);
 }
 
 //AUTH ROUTES
@@ -41,13 +41,13 @@ app.post('/api/register', async (req, res) => {
     //hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = {
-        id: user.length + 1,
+        id: users.length + 1,
         username,
         password: hashedPassword,
         role 
     };
 
-    user.push(newUser);
+    users.push(newUser);
     res.status(201).json({ message: 'User registered', username, role});
 });
 
@@ -55,19 +55,20 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
-    const user = user.find(u => u.username === username);
+    const user = users.find(u => u.username === username);
+
     if(!user || !await bcrypt.compare(password, user.password)) {
         return res.status(401).json({ error: 'Invalid Credentials' });
     }
 
     //Generate JWT token
     const token = jwt.sign(
-        { id: user.id, username: user.username, role: role.role },
+        { id: user.id, username: user.username, role: user.role },
         SECRET_KEY,
-        { expiresIn: '1m'}
+        { expiresIn: '2m'}
     );
 
-    res.json({ token, user: {username: user.username, role: user.role} });
+    res.json({ token, user: {username: user.username, role: user.role, First_name: user.First_name, Last_name: user.Last_name, email: user.email} });
 });
 
 // Undocumented
@@ -77,7 +78,7 @@ app.get('/api/profile', authenticateToken, (req, res) => {
 });
 
 // ROLE-BASED PROTECTED ROUTE; Admin-only
-app.get('/api/admin/dashboar', authenticateToken, autorizeRole('admin'), (req, res) => {
+app.get('/api/admin/dashboard', authenticateToken, authorizeRole('admin'), (req, res) => {
     res.json({ message: 'Welcome to admin dashboard', data: 'Secret admin info'
      });
 });
@@ -99,6 +100,27 @@ function authenticateToken(req, res, next){
     }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
-
+        if(err) return res.status(403).json({ error: 'Invalid or expired token' });
+        req.user = user;
+        next();
     })
 }
+
+// Role authorization
+function authorizeRole(role) {
+    return (req, res, next) => {
+        if (req.user.role !== role) {
+            return res.status(403).json({ error: 'Access Denied: Restricted Permission'});
+        }
+        next();
+    }
+}
+
+// Start Server
+app.listen(PORT, () => {
+    console.log(`Backend runnign on http://localhost:${PORT}`);
+    console.log(`Try logging in with:`);
+    console.log(`   - Admin: username=admin, password=admin123`);
+    console.log(`   - User: username=alice, password=user123`);
+});
+
