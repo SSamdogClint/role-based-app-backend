@@ -1,0 +1,41 @@
+/*hide page*/
+.page {
+    display: none;
+}
+
+/*show page*/
+.page.active {
+    display: block;
+}
+
+/*for not authenticate and logged in sections*/
+body.not-authenticated  .role-logged-in { display: none !important; }
+
+/*for logout sections*/
+body.authenticated      .role-logged-out { display: none !important; }
+
+/*for admin sections*/
+body.is-admin           .role-admin { display: block !important;}
+
+/*for admin sections*/
+.role-admin { display: none !important; }
+
+
+
+/*show alert after login verification*/
+.show-alert {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+/*hide alert default*/
+.show-alert.active {
+    display: none;
+    opacity: 1;
+}
+
+/* hide verified alert by default */
+#verified-alert {
+    display: none;
+}
