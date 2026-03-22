@@ -19,8 +19,8 @@ app.use(express.json());//middleware to parse JSON
 
 // in memory database
 let users = [
-    { id: 1, username: 'admin', password: 'placeholder', role: 'admin', First_name: 'Admin', Last_name: '123', email: 'admin@example.com' },
-    { id: 2, username: 'alice', password: 'placeholder', role: 'user', First_name: 'Alice', Last_name: 'Gou', email: 'user1@example.com' }
+    { id: 1, username: 'admin', password: 'placeholder', role: 'admin', First_name: 'Admin', Last_name: '123', email: 'admin@example.com', verified: true },
+    { id: 2, username: 'alice', password: 'placeholder', role: 'user', First_name: 'Alice', Last_name: 'Gou', email: 'user1@example.com', verified: true }
 ];
 
 if (!users[0].password.includes('$2a$')) {
